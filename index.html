@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ordspel</title>
+    <style>
+      body,
+      input {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+      }
+      #board {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+      }
+
+      .square {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        aspect-ratio: 1/1;
+        font-size: 50px;
+        line-height: 1;
+        text-transform: uppercase;
+        border-radius: 5px;
+      }
+
+      .bg-green {
+        background-color: lightgreen;
+      }
+
+      .bg-yellow {
+        background-color: yellow;
+      }
+
+      .bg-gray {
+        background-color: lightgray;
+      }
+
+      input {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        font-size: 50px;
+        padding: 0;
+        margin: 0;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      input:focus {
+        border-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <script>
+      const game = document.getElementById("game")
+      let state = {
+        correctWord: null,
+        attemptedWords: null,
+        currentAttemptIndex: 0,
+        focusedInputIndex: 0,
+      }
+
+      const view = {
+        board() {
+          const el = document.createElement("div")
+          el.id = "board"
+          return el
+        },
+      }
+
+      function square(contents, className) {
+        const el = document.createElement("div")
+        el.classList.add("square", className)
+        el.appendChild(contents)
+        return el
+      }
+
+      function render() {
+        const board = view.board()
+        state.attemptedWords.forEach((word, index) => {
+          if (index === state.currentAttemptIndex) {
+            word.forEach((letter, letterIndex) => {
+              const input = document.createElement("input")
+              input.dataset.index = letterIndex
+              input.value = letter ?? ""
+              board.appendChild(square(input))
+            })
+          } else {
+            word.forEach((letter, letterIndex) => {
+              const letterEl = document.createElement("span")
+              letterEl.textContent = letter ?? ""
+              const squareClass =
+                state.correctWord[letterIndex] === letter
+                  ? "bg-green"
+                  : state.correctWord.includes(letter)
+                  ? "bg-yellow"
+                  : "bg-gray"
+
+              board.appendChild(square(letterEl, squareClass))
+            })
+          }
+        })
+
+        game.replaceChildren(board)
+        effects.focusInput()
+      }
+      const utils = {
+        clamp(min, n, max) {
+          return Math.min(Math.max(n, min), max)
+        },
+      }
+      const actions = {
+        startGame(correctWord, numberOfAttempts) {
+          state.correctWord = Array.from(correctWord)
+          state.attemptedWords = new Array(numberOfAttempts)
+            .fill(undefined)
+            .map(() => new Array(correctWord.length).fill(undefined))
+          state.currentAttemptIndex = 0
+          state.focusedInputIndex = 0
+        },
+        inputLetter(letter) {
+          state.attemptedWords[state.currentAttemptIndex][
+            state.focusedInputIndex
+          ] = letter
+        },
+        focusInput(n) {
+          state.focusedInputIndex = n
+        },
+        advanceFocusedInput(n) {
+          state.focusedInputIndex = utils.clamp(
+            0,
+            state.focusedInputIndex + n,
+            state.correctWord.length - 1
+          )
+        },
+        commitAttempt() {
+          state.currentAttemptIndex += 1
+          state.focusedInputIndex = 0
+        },
+      }
+
+      const effects = {
+        focusInput() {
+          document
+            .querySelector(`[data-index="${state.focusedInputIndex}"]`)
+            .focus()
+        },
+        newGame() {
+          const word = window.prompt("Ange ett nytt ord")
+          window.location.href = "?word=" + btoa(word)
+        },
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search)
+        const base64EncodedWord = params.get("word")
+        const correctWord = base64EncodedWord && atob(base64EncodedWord)
+
+        if (!correctWord || correctWord.length !== 5) {
+          effects.newGame()
+        } else {
+          const numberOfAttempts = 6
+          actions.startGame(correctWord, numberOfAttempts)
+          render()
+        }
+      })
+
+      document.addEventListener("keydown", (event) => {
+        if (event.metaKey) return
+        else if (event.key === "Escape") {
+          effects.newGame()
+        } else if (event.key === "Backspace") {
+          event.preventDefault()
+          actions.inputLetter(undefined)
+          actions.advanceFocusedInput(-1)
+        } else if (event.key === "Enter") {
+          event.preventDefault()
+          actions.commitAttempt()
+        } else if ("abcdefghijklmnopqrstuvwxyzåäö".includes(event.key)) {
+          event.preventDefault()
+          actions.inputLetter(event.key)
+          actions.advanceFocusedInput(1)
+        }
+
+        render()
+      })
+
+      document.addEventListener(
+        "click",
+        (event) => {
+          // console.log(event.target, document.activeElement)
+          // if (event.target === document.activeElement) return
+          const index = parseInt(event.target.dataset?.index, 10)
+          !isNaN(index) && actions.focusInput(index)
+          render()
+        },
+        true
+      )
+    </script>
+  </body>
+</html>
