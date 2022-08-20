@@ -202,8 +202,9 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        const params = new URLSearchParams(window.location.search)
-        const encodedWord = params.get("word").trim()
+        const params =
+          window.location.search && new URLSearchParams(window.location.search)
+        const encodedWord = params && params.get("word").trim()
         const correctWord = encodedWord && utils.decodeWord(encodedWord)
 
         if (!correctWord || correctWord.length !== 5) {
