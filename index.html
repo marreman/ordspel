@@ -38,7 +38,11 @@
       }
 
       .bg-gray {
-        background-color: lightgray;
+        background-color: #eeeeee;
+      }
+
+      .bg-lighter-gray {
+        background-color: #fafafa;
       }
 
       input {
@@ -94,6 +98,21 @@
               input.dataset.index = letterIndex
               input.value = letter ?? ""
               board.appendChild(square(input))
+            })
+          } else if (index > state.currentAttemptIndex) {
+            word.forEach((letter, letterIndex) => {
+              const letterEl = document.createElement("span")
+              letterEl.textContent = letter ?? ""
+              const squareClass =
+                state.correctWord[letterIndex] === letter
+                  ? "bg-green"
+                  : state.correctWord.includes(letter)
+                  ? "bg-yellow"
+                  : "bg-gray"
+
+              board.appendChild(
+                square(document.createTextNode(""), "bg-lighter-gray")
+              )
             })
           } else {
             word.forEach((letter, letterIndex) => {
