@@ -156,6 +156,12 @@
         clamp(min, n, max) {
           return Math.min(Math.max(n, min), max)
         },
+        encodeWord(word) {
+          return encodeURIComponent(btoa(word))
+        },
+        decodeWord(word) {
+          return atob(decodeURIComponent(word))
+        },
       }
 
       const actions = {
@@ -177,7 +183,8 @@
       const effects = {
         newGame() {
           const word = window.prompt("Ange ett nytt ord")
-          window.location.href = "?word=" + btoa(word)
+          window.location.href =
+            "?word=" + utils.encodeWord(word.toLowerCase().trim())
         },
         declareWinner() {
           if (state.hasWon) return
@@ -196,14 +203,13 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams(window.location.search)
-        const base64EncodedWord = params.get("word")
-        const correctWord = base64EncodedWord && atob(base64EncodedWord)
+        const encodedWord = params.get("word").trim()
+        const correctWord = encodedWord && utils.decodeWord(encodedWord)
 
         if (!correctWord || correctWord.length !== 5) {
           effects.newGame()
         } else {
-          const numberOfAttempts = 6
-          actions.startGame(correctWord, numberOfAttempts)
+          actions.startGame(correctWord, 6)
           view.game()
         }
       })
