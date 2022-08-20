@@ -95,6 +95,7 @@
       }
 
       function render() {
+        console.log(state)
         const board = view.board()
         state.attemptedWords.forEach((word, index) => {
           if (index === state.currentAttemptIndex) {
@@ -220,12 +221,13 @@
       })
 
       document.addEventListener(
-        "click",
+        "focusin",
         (event) => {
-          // console.log(event.target, document.activeElement)
-          // if (event.target === document.activeElement) return
-          const index = parseInt(event.target.dataset?.index, 10)
-          !isNaN(index) && actions.focusInput(index)
+          const currentFocusIndex = state.focusedInputIndex
+          const nextFocusIndex = parseInt(event.target.dataset?.index, 10)
+          if (isNaN(nextFocusIndex) || nextFocusIndex === currentFocusIndex)
+            return
+          actions.focusInput(nextFocusIndex)
           render()
         },
         true
