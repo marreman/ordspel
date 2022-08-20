@@ -215,18 +215,36 @@
           view.game()
         } else if (event.key === "Backspace") {
           event.preventDefault()
-          event.target.value = ""
-          event.target.previousElementSibling.focus()
+          const currentInput = event.target
+          const previousInput = currentInput.previousElementSibling
+          const currentLetter = getLetter(currentInput)
+          const previousLetter = previousInput && getLetter(previousInput)
+          if (currentLetter.value) {
+            actions.inputLetter("", currentLetter.index)
+            currentInput.value = ""
+          } else if (previousLetter) {
+            actions.inputLetter("", previousLetter.index)
+            previousInput.value = ""
+          }
+          previousInput && previousInput.focus()
         }
       })
 
       document.addEventListener("input", (event) => {
-        const letter = (event.target.value ?? "").trim().slice(-1)
-        const index = parseInt(event.target.dataset?.index, 10)
-        actions.inputLetter(letter, index)
-        event.target.value = letter
-        event.target.nextElementSibling.focus()
+        const currentInput = event.target
+        const currentLetter = getLetter(currentInput)
+        const nextInput = currentInput.nextElementSibling
+        actions.inputLetter(currentLetter.value, currentLetter.index)
+        currentInput.value = currentLetter.value
+        nextInput && nextInput.focus()
       })
+
+      function getLetter(input) {
+        const value = (input.value ?? "").trim().toLowerCase().slice(-1)
+        const index = parseInt(input.dataset?.index, 10)
+
+        return { value, index }
+      }
     </script>
   </body>
 </html>
