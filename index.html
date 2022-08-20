@@ -68,8 +68,6 @@
     <script>
       /*
       - No autocorrect keyboard
-      - Win condition
-      - learn more about word
       */
       const game = document.getElementById("game")
       const state = {
@@ -90,7 +88,7 @@
 
       function square(contents, className) {
         const el = document.createElement("div")
-        el.classList.add("square", className)
+        className && el.classList.add("square", className)
         el.appendChild(contents)
         return el
       }
@@ -107,21 +105,24 @@
         return square(letterEl, squareClass)
       }
 
+      function inputSquare(letter, letterIndex) {
+        const input = document.createElement("input")
+        input.dataset.index = letterIndex
+        input.value = letter ?? ""
+        return square(input)
+      }
+
       function render() {
         console.log(state)
         const board = view.board()
         state.attemptedWords.forEach((word, index) => {
-          console.log(word)
           if (state.currentAttemptIndex == null) {
             word.forEach((letter, letterIndex) => {
               board.appendChild(coloredSquare(letter, letterIndex))
             })
           } else if (index === state.currentAttemptIndex) {
             word.forEach((letter, letterIndex) => {
-              const input = document.createElement("input")
-              input.dataset.index = letterIndex
-              input.value = letter ?? ""
-              board.appendChild(square(input))
+              board.appendChild(inputSquare(letter, letterIndex))
             })
           } else if (index > state.currentAttemptIndex) {
             word.forEach(() => {
