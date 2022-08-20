@@ -66,8 +66,13 @@
   <body>
     <div id="game"></div>
     <script>
+      /*
+      - No autocorrect keyboard
+      - Win condition
+      - learn more about word
+      */
       const game = document.getElementById("game")
-      let state = {
+      const state = {
         correctWord: null,
         attemptedWords: null,
         currentAttemptIndex: 0,
