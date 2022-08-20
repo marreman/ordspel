@@ -82,9 +82,9 @@
     <div id="game"></div>
     <script>
       /*
-      - Fix word encoding and decoding
-      - make all letters lowercase always
       - prevent submitting incomplete word
+      - show that a letter is both correct and present elsewhere
+      - if only one R and you get it green, don't allow another R to be yellow
       */
       const game = document.getElementById("game")
       const state = {
@@ -119,6 +119,7 @@
         },
         inputSquare(letter, letterIndex) {
           const input = document.createElement("input")
+          input.autocapitalize = "off"
           input.dataset.index = letterIndex
           input.value = letter ?? ""
           return input
@@ -133,7 +134,9 @@
               })
             } else if (index === state.currentAttemptIndex) {
               word.forEach((letter, letterIndex) => {
-                board.appendChild(view.inputSquare(letter, letterIndex))
+                const input = view.inputSquare(letter, letterIndex)
+                if (letterIndex === 0) input.autofocus = true
+                board.appendChild(input)
               })
             } else if (index > state.currentAttemptIndex) {
               word.forEach(() => {
