@@ -77,14 +77,14 @@
     <div id="game"></div>
     <script>
       /*
-      - No autocorrect keyboard
+      - Fix word encoding and decoding
+      - make all letters lowercase always
       */
       const game = document.getElementById("game")
       const state = {
         correctWord: null,
         attemptedWords: null,
         currentAttemptIndex: 0,
-        focusedInputIndex: 0,
         hasWon: false,
       }
 
@@ -152,7 +152,6 @@
         button.addEventListener("click", () => effects.newGame())
 
         game.replaceChildren(board, button)
-        // effects.focusInput()
         effects.declareWinner()
       }
       const utils = {
@@ -167,40 +166,16 @@
             .fill(undefined)
             .map(() => new Array(correctWord.length).fill(undefined))
           state.currentAttemptIndex = 0
-          state.focusedInputIndex = 0
         },
-        inputLetter(letter) {
-          state.attemptedWords[state.currentAttemptIndex][
-            state.focusedInputIndex
-          ] = letter
-        },
-        inputLetter2(letter, index) {
+        inputLetter(letter, index) {
           state.attemptedWords[state.currentAttemptIndex][index] = letter
-        },
-        focusInput(n) {
-          state.focusedInputIndex = n
-        },
-        advanceFocusedInput(n) {
-          state.focusedInputIndex = utils.clamp(
-            0,
-            state.focusedInputIndex + n,
-            state.correctWord.length - 1
-          )
         },
         commitAttempt() {
           state.currentAttemptIndex += 1
-          state.focusedInputIndex = 0
         },
       }
 
       const effects = {
-        focusInput() {
-          const input = document.querySelector(
-            `[data-index="${state.focusedInputIndex}"]`
-          )
-
-          input && input.focus()
-        },
         newGame() {
           const word = window.prompt("Ange ett nytt ord")
           window.location.href = "?word=" + btoa(word)
@@ -246,50 +221,13 @@
         }
       })
 
-      // document.addEventListener("focusin", (event) => {
-      //   console.log("Gonna focus on", event.target)
-      //   event.target.select()
-      // })
-
       document.addEventListener("input", (event) => {
         const letter = (event.target.value ?? "").trim().slice(-1)
         const index = parseInt(event.target.dataset?.index, 10)
-        actions.inputLetter2(letter, index)
+        actions.inputLetter(letter, index)
         event.target.value = letter
         event.target.nextElementSibling.focus()
-        // render()
-
-        // if (event.metaKey) return
-        // else if (event.key === "Escape") {
-        //   effects.newGame()
-        // } else if (event.key === "Backspace") {
-        //   event.preventDefault()
-        //   actions.inputLetter(undefined)
-        //   actions.advanceFocusedInput(-1)
-        // } else if (event.key === "Enter") {
-        //   event.preventDefault()
-        //   actions.commitAttempt()
-        // } else if ("abcdefghijklmnopqrstuvwxyzåäö".includes(event.key)) {
-        //   event.preventDefault()
-        //   actions.inputLetter(event.key)
-        //   actions.advanceFocusedInput(1)
-        // }
-
-        // render()
       })
-
-      // document.addEventListener(
-      //   "focusin",
-      //   (event) => {
-      //     const currentFocusIndex = state.focusedInputIndex
-      //     const nextFocusIndex = parseInt(event.target.dataset?.index, 10)
-      //     if (isNaN(nextFocusIndex) || nextFocusIndex === currentFocusIndex)
-      //       return
-      //     actions.focusInput(nextFocusIndex)
-      //     render()
-      //   },
-      //   true
-      // )
     </script>
   </body>
 </html>
