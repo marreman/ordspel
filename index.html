@@ -77,6 +77,7 @@
         attemptedWords: null,
         currentAttemptIndex: 0,
         focusedInputIndex: 0,
+        hasWon: false,
       }
 
       const view = {
@@ -94,11 +95,28 @@
         return el
       }
 
+      function coloredSquare(letter, letterIndex) {
+        const letterEl = document.createElement("span")
+        letterEl.textContent = letter ?? ""
+        const squareClass =
+          state.correctWord[letterIndex] === letter
+            ? "bg-green"
+            : state.correctWord.includes(letter)
+            ? "bg-yellow"
+            : "bg-gray"
+        return square(letterEl, squareClass)
+      }
+
       function render() {
         console.log(state)
         const board = view.board()
         state.attemptedWords.forEach((word, index) => {
-          if (index === state.currentAttemptIndex) {
+          console.log(word)
+          if (state.currentAttemptIndex == null) {
+            word.forEach((letter, letterIndex) => {
+              board.appendChild(coloredSquare(letter, letterIndex))
+            })
+          } else if (index === state.currentAttemptIndex) {
             word.forEach((letter, letterIndex) => {
               const input = document.createElement("input")
               input.dataset.index = letterIndex
@@ -106,38 +124,21 @@
               board.appendChild(square(input))
             })
           } else if (index > state.currentAttemptIndex) {
-            word.forEach((letter, letterIndex) => {
-              const letterEl = document.createElement("span")
-              letterEl.textContent = letter ?? ""
-              const squareClass =
-                state.correctWord[letterIndex] === letter
-                  ? "bg-green"
-                  : state.correctWord.includes(letter)
-                  ? "bg-yellow"
-                  : "bg-gray"
-
+            word.forEach(() => {
               board.appendChild(
                 square(document.createTextNode(""), "bg-lighter-gray")
               )
             })
           } else {
             word.forEach((letter, letterIndex) => {
-              const letterEl = document.createElement("span")
-              letterEl.textContent = letter ?? ""
-              const squareClass =
-                state.correctWord[letterIndex] === letter
-                  ? "bg-green"
-                  : state.correctWord.includes(letter)
-                  ? "bg-yellow"
-                  : "bg-gray"
-
-              board.appendChild(square(letterEl, squareClass))
+              board.appendChild(coloredSquare(letter, letterIndex))
             })
           }
         })
 
         game.replaceChildren(board)
         effects.focusInput()
+        effects.declareWinner()
       }
       const utils = {
         clamp(min, n, max) {
@@ -176,13 +177,28 @@
 
       const effects = {
         focusInput() {
-          document
-            .querySelector(`[data-index="${state.focusedInputIndex}"]`)
-            .focus()
+          const input = document.querySelector(
+            `[data-index="${state.focusedInputIndex}"]`
+          )
+
+          input && input.focus()
         },
         newGame() {
           const word = window.prompt("Ange ett nytt ord")
           window.location.href = "?word=" + btoa(word)
+        },
+        declareWinner() {
+          if (state.hasWon) return
+          state.attemptedWords.forEach((word, index) => {
+            if (
+              word.join("") === state.correctWord.join("") &&
+              index !== state.currentAttemptIndex
+            ) {
+              state.hasWon = true
+              state.currentAttemptIndex = null
+              render()
+            }
+          })
         },
       }
 
