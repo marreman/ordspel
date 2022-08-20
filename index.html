@@ -57,6 +57,7 @@
         line-height: 1;
         text-transform: uppercase;
         box-sizing: border-box;
+        caret-color: transparent;
       }
     </style>
   </head>
@@ -229,11 +230,14 @@
         }
       })
 
+      // document.addEventListener("focusin", (event) => {
+      //   console.log("Gonna focus on", event.target)
+      //   event.target.select()
+      // })
+
       document.addEventListener("input", (event) => {
-        console.log(event)
         const letter = (event.target.value ?? "").trim().slice(-1)
         const index = parseInt(event.target.dataset?.index, 10)
-        console.log(letter, index)
         actions.inputLetter2(letter, index)
         event.target.value = letter
         event.target.nextElementSibling.focus()
