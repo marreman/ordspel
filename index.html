@@ -56,10 +56,7 @@
         border: 1px solid rgba(0, 0, 0, 0.1);
         line-height: 1;
         text-transform: uppercase;
-      }
-
-      input:focus {
-        border-color: black;
+        box-sizing: border-box;
       }
     </style>
   </head>
@@ -109,7 +106,7 @@
         const input = document.createElement("input")
         input.dataset.index = letterIndex
         input.value = letter ?? ""
-        return square(input)
+        return input
       }
 
       function render() {
@@ -138,7 +135,7 @@
         })
 
         game.replaceChildren(board)
-        effects.focusInput()
+        // effects.focusInput()
         effects.declareWinner()
       }
       const utils = {
@@ -159,6 +156,9 @@
           state.attemptedWords[state.currentAttemptIndex][
             state.focusedInputIndex
           ] = letter
+        },
+        inputLetter2(letter, index) {
+          state.attemptedWords[state.currentAttemptIndex][index] = letter
         },
         focusInput(n) {
           state.focusedInputIndex = n
@@ -218,37 +218,58 @@
       })
 
       document.addEventListener("keydown", (event) => {
-        if (event.metaKey) return
-        else if (event.key === "Escape") {
-          effects.newGame()
-        } else if (event.key === "Backspace") {
-          event.preventDefault()
-          actions.inputLetter(undefined)
-          actions.advanceFocusedInput(-1)
-        } else if (event.key === "Enter") {
+        if (event.key === "Enter") {
           event.preventDefault()
           actions.commitAttempt()
-        } else if ("abcdefghijklmnopqrstuvwxyzåäö".includes(event.key)) {
+          render()
+        } else if (event.key === "Backspace") {
           event.preventDefault()
-          actions.inputLetter(event.key)
-          actions.advanceFocusedInput(1)
+          event.target.value = ""
+          event.target.previousElementSibling.focus()
         }
-
-        render()
       })
 
-      document.addEventListener(
-        "focusin",
-        (event) => {
-          const currentFocusIndex = state.focusedInputIndex
-          const nextFocusIndex = parseInt(event.target.dataset?.index, 10)
-          if (isNaN(nextFocusIndex) || nextFocusIndex === currentFocusIndex)
-            return
-          actions.focusInput(nextFocusIndex)
-          render()
-        },
-        true
-      )
+      document.addEventListener("input", (event) => {
+        console.log(event)
+        const letter = (event.target.value ?? "").trim().slice(-1)
+        const index = parseInt(event.target.dataset?.index, 10)
+        console.log(letter, index)
+        actions.inputLetter2(letter, index)
+        event.target.value = letter
+        event.target.nextElementSibling.focus()
+        // render()
+
+        // if (event.metaKey) return
+        // else if (event.key === "Escape") {
+        //   effects.newGame()
+        // } else if (event.key === "Backspace") {
+        //   event.preventDefault()
+        //   actions.inputLetter(undefined)
+        //   actions.advanceFocusedInput(-1)
+        // } else if (event.key === "Enter") {
+        //   event.preventDefault()
+        //   actions.commitAttempt()
+        // } else if ("abcdefghijklmnopqrstuvwxyzåäö".includes(event.key)) {
+        //   event.preventDefault()
+        //   actions.inputLetter(event.key)
+        //   actions.advanceFocusedInput(1)
+        // }
+
+        // render()
+      })
+
+      // document.addEventListener(
+      //   "focusin",
+      //   (event) => {
+      //     const currentFocusIndex = state.focusedInputIndex
+      //     const nextFocusIndex = parseInt(event.target.dataset?.index, 10)
+      //     if (isNaN(nextFocusIndex) || nextFocusIndex === currentFocusIndex)
+      //       return
+      //     actions.focusInput(nextFocusIndex)
+      //     render()
+      //   },
+      //   true
+      // )
     </script>
   </body>
 </html>
