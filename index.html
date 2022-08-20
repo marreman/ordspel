@@ -79,6 +79,7 @@
       /*
       - Fix word encoding and decoding
       - make all letters lowercase always
+      - prevent submitting incomplete word
       */
       const game = document.getElementById("game")
       const state = {
@@ -94,71 +95,69 @@
           el.id = "board"
           return el
         },
+        square(contents, className) {
+          const el = document.createElement("div")
+          className && el.classList.add("square", className)
+          el.appendChild(contents)
+          return el
+        },
+        coloredSquare(letter, letterIndex) {
+          const letterEl = document.createElement("span")
+          letterEl.textContent = letter ?? ""
+          const squareClass =
+            state.correctWord[letterIndex] === letter
+              ? "bg-green"
+              : state.correctWord.includes(letter)
+              ? "bg-yellow"
+              : "bg-gray"
+          return view.square(letterEl, squareClass)
+        },
+        inputSquare(letter, letterIndex) {
+          const input = document.createElement("input")
+          input.dataset.index = letterIndex
+          input.value = letter ?? ""
+          return input
+        },
+        game() {
+          console.log(state)
+          const board = view.board()
+          state.attemptedWords.forEach((word, index) => {
+            if (state.currentAttemptIndex == null) {
+              word.forEach((letter, letterIndex) => {
+                board.appendChild(view.coloredSquare(letter, letterIndex))
+              })
+            } else if (index === state.currentAttemptIndex) {
+              word.forEach((letter, letterIndex) => {
+                board.appendChild(view.inputSquare(letter, letterIndex))
+              })
+            } else if (index > state.currentAttemptIndex) {
+              word.forEach(() => {
+                board.appendChild(
+                  view.square(document.createTextNode(""), "bg-lighter-gray")
+                )
+              })
+            } else {
+              word.forEach((letter, letterIndex) => {
+                board.appendChild(view.coloredSquare(letter, letterIndex))
+              })
+            }
+          })
+
+          const button = document.createElement("button")
+          button.textContent = "Nytt spel"
+          button.addEventListener("click", () => effects.newGame())
+
+          game.replaceChildren(board, button)
+          effects.declareWinner()
+        },
       }
 
-      function square(contents, className) {
-        const el = document.createElement("div")
-        className && el.classList.add("square", className)
-        el.appendChild(contents)
-        return el
-      }
-
-      function coloredSquare(letter, letterIndex) {
-        const letterEl = document.createElement("span")
-        letterEl.textContent = letter ?? ""
-        const squareClass =
-          state.correctWord[letterIndex] === letter
-            ? "bg-green"
-            : state.correctWord.includes(letter)
-            ? "bg-yellow"
-            : "bg-gray"
-        return square(letterEl, squareClass)
-      }
-
-      function inputSquare(letter, letterIndex) {
-        const input = document.createElement("input")
-        input.dataset.index = letterIndex
-        input.value = letter ?? ""
-        return input
-      }
-
-      function render() {
-        console.log(state)
-        const board = view.board()
-        state.attemptedWords.forEach((word, index) => {
-          if (state.currentAttemptIndex == null) {
-            word.forEach((letter, letterIndex) => {
-              board.appendChild(coloredSquare(letter, letterIndex))
-            })
-          } else if (index === state.currentAttemptIndex) {
-            word.forEach((letter, letterIndex) => {
-              board.appendChild(inputSquare(letter, letterIndex))
-            })
-          } else if (index > state.currentAttemptIndex) {
-            word.forEach(() => {
-              board.appendChild(
-                square(document.createTextNode(""), "bg-lighter-gray")
-              )
-            })
-          } else {
-            word.forEach((letter, letterIndex) => {
-              board.appendChild(coloredSquare(letter, letterIndex))
-            })
-          }
-        })
-
-        const button = document.createElement("button")
-        button.textContent = "Nytt spel"
-        button.addEventListener("click", () => effects.newGame())
-
-        game.replaceChildren(board, button)
-        effects.declareWinner()
-      }
       const utils = {
         clamp(min, n, max) {
           return Math.min(Math.max(n, min), max)
         },
       }
+
       const actions = {
         startGame(correctWord, numberOfAttempts) {
           state.correctWord = Array.from(correctWord)
@@ -189,7 +188,7 @@
             ) {
               state.hasWon = true
               state.currentAttemptIndex = null
-              render()
+              view.game()
             }
           })
         },
@@ -205,7 +204,7 @@
         } else {
           const numberOfAttempts = 6
           actions.startGame(correctWord, numberOfAttempts)
-          render()
+          view.game()
         }
       })
 
@@ -213,7 +212,7 @@
         if (event.key === "Enter") {
           event.preventDefault()
           actions.commitAttempt()
-          render()
+          view.game()
         } else if (event.key === "Backspace") {
           event.preventDefault()
           event.target.value = ""
