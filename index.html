@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <script type="module" src="game.js"></script>
     <title>Ordspel</title>
     <style>
       body,
@@ -85,7 +84,8 @@
   </head>
   <body>
     <div id="game"></div>
-    <script>
+    <script type="module">
+      import { evaluateGuess } from "./game.js"
       /*
       - prevent submitting incomplete word
       - show that a letter is both correct and present elsewhere
@@ -105,22 +105,29 @@
           el.id = "board"
           return el
         },
+        bgColor(color) {
+          switch (color) {
+            case "green":
+              return "bg-green"
+            case "yellow":
+              return "bg-yellow"
+            case "green-yellow":
+              return "bg-green-and-yellow"
+            case "gray":
+            default:
+              return "bg-gray"
+          }
+        },
         square(contents, className) {
           const el = document.createElement("div")
           className && el.classList.add("square", className)
           el.appendChild(contents)
           return el
         },
-        coloredSquare(letter, letterIndex) {
+        coloredSquare(letter, letterIndex, colors) {
           const letterEl = document.createElement("span")
           letterEl.textContent = letter ?? ""
-          const squareClass =
-            state.correctWord[letterIndex] === letter
-              ? "bg-green"
-              : state.correctWord.includes(letter)
-              ? "bg-yellow"
-              : "bg-gray"
-          return view.square(letterEl, squareClass)
+          return view.square(letterEl, view.bgColor(colors[letterIndex]))
         },
         inputSquare(letter, letterIndex) {
           const input = document.createElement("input")
@@ -132,9 +139,12 @@
         game() {
           const board = view.board()
           state.attemptedWords.forEach((word, index) => {
+            const colors = evaluateGuess(word, state.correctWord)
             if (state.currentAttemptIndex == null) {
               word.forEach((letter, letterIndex) => {
-                board.appendChild(view.coloredSquare(letter, letterIndex))
+                board.appendChild(
+                  view.coloredSquare(letter, letterIndex, colors)
+                )
               })
             } else if (index === state.currentAttemptIndex) {
               word.forEach((letter, letterIndex) => {
@@ -150,7 +160,9 @@
               })
             } else {
               word.forEach((letter, letterIndex) => {
-                board.appendChild(view.coloredSquare(letter, letterIndex))
+                board.appendChild(
+                  view.coloredSquare(letter, letterIndex, colors)
+                )
               })
             }
           })
