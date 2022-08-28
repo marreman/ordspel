@@ -9,36 +9,46 @@ const test = (actual, expected, message) => {
 const evaluateGuess = (guess, answer) => {
   log("evaluateGuess", guess, answer)
 
-  const letters = Array.from(answer).map((letter, i) => ({
-    answer: letter,
-    guess: guess[i],
-    color: "gray",
-  }))
+  const colors = Array(guess.length).fill("gray")
 
-  const greens = letters.map((letter) => ({
-    ...letter,
-    color: letter.guess === letter.answer ? "green" : letter.color,
-  }))
-  const yellows = greens.map((letter) => ({
-    ...letter,
-    color: greens.find((l) => l.guess === letter.answer && l.color !== "green")
-      ? "yellow"
-      : letter.color,
-  }))
+  for (let i = 0; i < colors.length; i++) {
+    if (guess[i] === answer[i]) {
+      colors[i] = "green"
+    }
+  }
 
-  const result = yellows
-  const colors = result.map(({ color }) => color)
+  for (let i = 0; i < answer.length; i++) {
+    for (let j = 0; j < guess.length; j++) {
+      if (answer[i] === guess[j] && colors[j] !== "green") {
+        colors[j] = "yellow"
+        break
+      }
+    }
+  }
 
-  console.log(result)
+  for (let i = 0; i < colors.length; i++) {
+    if (colors[i] !== "green") continue
+    for (let j = 0; j < guess.length; j++) {
+      if (guess[j] === guess[i] && colors[j] === "gray") {
+        colors[i] = "green-yellow"
+        break
+      }
+    }
+  }
+
+  // console.log(result)
   console.log(colors)
 
   return colors
 }
 
-evaluateGuess("axxxx", "aazzz") // [ "green", "gray", "gray", "gray", "gray" ]
-evaluateGuess("aaxxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
-evaluateGuess("aaaxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
+// evaluateGuess("axxxx", "azzzz") // [ "green", "gray", "gray", "gray", "gray" ]
+// evaluateGuess("aaxxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
+// evaluateGuess("aaaxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
 evaluateGuess("axaxx", "aazzz") // [ "green", "gray", "yellow", "gray", "gray" ]
+// evaluateGuess("axaxx", "zzzza") // [ "green", "gray", "yellow", "gray", "gray" ]
+// evaluateGuess("sirap", "paris") // [ "yellow", "yellow", "green", "yellow", "yellow" ]
+evaluateGuess("axxxx", "aazzz") // [ "green-yellow", "gray", "gray", "gray", "gray" ]
 
 // test(
 //   evaluateGuess("axxxx", "azzzz"),
