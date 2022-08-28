@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <script type="module" src="game.js"></script>
     <title>Ordspel</title>
     <style>
       body,
@@ -36,6 +37,10 @@
         line-height: 1;
         text-transform: uppercase;
         border-radius: 5px;
+      }
+
+      .bg-green-and-yellow {
+        background: linear-gradient(-45deg, yellow 50%, lightgreen 50%);
       }
 
       .bg-green {
@@ -125,7 +130,6 @@
           return input
         },
         game() {
-          console.log(state)
           const board = view.board()
           state.attemptedWords.forEach((word, index) => {
             if (state.currentAttemptIndex == null) {
