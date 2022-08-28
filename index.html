@@ -86,11 +86,7 @@
     <div id="game"></div>
     <script type="module">
       import { evaluateGuess } from "./game.js"
-      /*
-      - prevent submitting incomplete word
-      - show that a letter is both correct and present elsewhere
-      - if only one R and you get it green, don't allow another R to be yellow
-      */
+
       const game = document.getElementById("game")
       const state = {
         correctWord: null,
