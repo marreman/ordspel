@@ -7,37 +7,38 @@ const test = (actual, expected, message) => {
 }
 
 const evaluateGuess = (guess, answer) => {
-  // log({ guess, answer })
+  log("evaluateGuess", guess, answer)
 
-  const grays = Array.from(guess).map((letter) => [letter, "gray"])
+  const letters = Array.from(answer).map((letter, i) => ({
+    answer: letter,
+    guess: guess[i],
+    color: "gray",
+  }))
 
-  const greens = grays.map(([letter, color], i) => [
-    letter,
-    answer.at(i) === letter ? "green" : color,
-  ])
+  const greens = letters.map((letter) => ({
+    ...letter,
+    color: letter.guess === letter.answer ? "green" : letter.color,
+  }))
+  const yellows = greens.map((letter) => ({
+    ...letter,
+    color: greens.find((l) => l.guess === letter.answer && l.color !== "green")
+      ? "yellow"
+      : letter.color,
+  }))
 
-  const yellows = greens.map(([letter, color], i) => [
-    letter,
-    answer.includes(letter) && color !== "green" ? "yellow" : color,
-  ])
+  const result = yellows
+  const colors = result.map(({ color }) => color)
 
-  const mixed = yellows.map(([letter, color], i) => [
-    letter,
-    color === "green" && moreNonYellow(yellows, letter)
-      ? "green-and-yellow"
-      : color,
-  ])
+  console.log(result)
+  console.log(colors)
 
-  return mixed
+  return colors
 }
 
-const moreNonYellow = (letters, letterToLookFor) => {
-  const s = letters.filter(
-    ([letter, color]) => color === "yellow" && letter === letterToLookFor
-  )
-
-  console.log(letters, letterToLookFor)
-}
+evaluateGuess("axxxx", "aazzz") // [ "green", "gray", "gray", "gray", "gray" ]
+evaluateGuess("aaxxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
+evaluateGuess("aaaxx", "aazzz") // [ "green", "green", "gray", "gray", "gray" ]
+evaluateGuess("axaxx", "aazzz") // [ "green", "gray", "yellow", "gray", "gray" ]
 
 // test(
 //   evaluateGuess("axxxx", "azzzz"),
@@ -63,14 +64,14 @@ const moreNonYellow = (letters, letterToLookFor) => {
 //   "two for two A, one in correct place"
 // )
 
-test(
-  evaluateGuess("axxxx", "aazzz"),
-  [
-    ["a", "green"],
-    ["x", "gray"],
-    ["x", "gray"],
-    ["x", "gray"],
-    ["x", "gray"],
-  ],
-  "one for two A, correct place"
-)
+// test(
+//   evaluateGuess("axxxx", "aazzz"),
+//   [
+//     ["a", "green"],
+//     ["x", "gray"],
+//     ["x", "gray"],
+//     ["x", "gray"],
+//     ["x", "gray"],
+//   ],
+//   "one for two A, correct place"
+// )
