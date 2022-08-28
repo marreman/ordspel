@@ -200,7 +200,12 @@
           state.attemptedWords[state.currentAttemptIndex][index] = letter
         },
         commitAttempt() {
-          state.currentAttemptIndex += 1
+          const currentAttempt = state.attemptedWords[state.currentAttemptIndex]
+          if (
+            currentAttempt.filter((l) => l && l.trim()).length ===
+            state.correctWord.length
+          )
+            state.currentAttemptIndex += 1
         },
       }
 
