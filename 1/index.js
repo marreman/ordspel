@@ -1,4 +1,7 @@
-const game = document.getElementById("game")
+const game = document.createElement("div")
+game.id = "game"
+document.body.append(game)
+
 const state = {
   correctWord: null,
   attemptedWords: null,
